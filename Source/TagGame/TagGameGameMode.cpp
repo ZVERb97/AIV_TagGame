@@ -23,17 +23,11 @@ void ATagGameGameMode::BeginPlay()
 	Super::BeginPlay();
 	TargetPoints.Empty();
 	Keys.Empty();
-	for (TActorIterator<ATagGameCharacter> It(GetWorld()); It; ++It)
-	{
-		Adversaries.Add(*It);
-
-	}
 	for (TActorIterator<ATreasureChest> It(GetWorld()); It; ++It)
 	{
 		Chest = (*It);
 
 	}
-	
 	ResetMatch();
 }
 
@@ -43,7 +37,7 @@ void ATagGameGameMode::Tick(float DeltaTime)
 
 	for (int32 Index = 0; Index < Keys.Num(); Index++)
 	{
-		if (Keys[Index]->GetAttachParentActor() != GetWorld()->GetFirstPlayerController()->GetPawn())
+		if (Keys[Index]->GetAttachParentActor() != Chest)
 		{
 			return;
 		}
@@ -61,15 +55,17 @@ void ATagGameGameMode::ResetMatch()
 	}
 	for (TActorIterator<ABall> It(GetWorld()); It; ++It)
 	{
-
-		if (It->GetAttachParentActor())
-		{
-			It->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		}
 		Keys.Add(*It);
+
+		if (It->GetAttachParentActor() != GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			It->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+		}
+
 		It->SetActorHiddenInGame(false);
 
 	}
+	
 
 	TArray<ATargetPoint*> RandomTargetPoints = TargetPoints;
 
@@ -82,6 +78,39 @@ void ATagGameGameMode::ResetMatch()
 	
 }
 
+void ATagGameGameMode::ResetMatchForPlayer()
+{
+	for (TActorIterator<ATargetPoint> It(GetWorld()); It; ++It)
+	{
+		TargetPoints.Add(*It);
+
+	}
+	for (TActorIterator<ABall> It(GetWorld()); It; ++It)
+	{
+		Keys.Add(*It);
+
+		UE_LOG(LogTemp, Error, TEXT("RESET MATCH"));
+
+		if (It->GetAttachParentActor() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			It->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+		}
+
+		It->SetActorHiddenInGame(false);
+
+	}
+
+
+	TArray<ATargetPoint*> RandomTargetPoints = TargetPoints;
+
+	for (int32 Index = 0; Index < Keys.Num(); Index++)
+	{
+		const int32 RandomTargetIndex = FMath::RandRange(0, RandomTargetPoints.Num() - 1);
+		Keys[Index]->SetActorLocation(RandomTargetPoints[RandomTargetIndex]->GetActorLocation());
+		RandomTargetPoints.RemoveAt(RandomTargetIndex);
+	}
+}
+
 const TArray<ABall*>& ATagGameGameMode::GetKeys() const
 {
 	return Keys;
@@ -90,10 +119,5 @@ const TArray<ABall*>& ATagGameGameMode::GetKeys() const
 ATreasureChest* ATagGameGameMode::GetChest() const
 {
 	return Chest;
-}
-
-const TArray<class ATagGameCharacter*>& ATagGameGameMode::GetAdversaries() const
-{
-	return Adversaries;
 }
 

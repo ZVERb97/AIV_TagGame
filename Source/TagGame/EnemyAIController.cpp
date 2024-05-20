@@ -71,9 +71,7 @@ void AEnemyAIController::BeginPlay()
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
-			EPathFollowingStatus::Type State = AIController->GetMoveStatus();
-
-			if (!BestKey)
+			if (BestKey->GetAttachParentActor())
 			{
 				return Fight;
 			}
@@ -96,7 +94,9 @@ void AEnemyAIController::BeginPlay()
 		[this](AAIController* AIController) {
 
 			BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+			BestKey->AttachToActor(Chest, FAttachmentTransformRules::KeepRelativeTransform);
 			BestKey->SetActorHiddenInGame(true);
+			
 
 		},
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
@@ -105,10 +105,6 @@ void AEnemyAIController::BeginPlay()
 			if (State == EPathFollowingStatus::Moving)
 			{
 				return nullptr;
-			}
-			if (!BestKey)
-			{
-				return Fight;
 			}
 			
 			return Wait;
@@ -140,12 +136,12 @@ void AEnemyAIController::BeginPlay()
 				return nullptr;
 			}
 			
-			if(Adversary)
+			if(!BestKey->GetParentActor())
 			{
-				UE_LOG(LogTemp, Error, TEXT("FIGHTING"));
+				return SearchForKeys;
 			}
 
-			return SearchForKeys;
+			return nullptr;
 		});
 
 	Wait = MakeShared<FAIVState>(

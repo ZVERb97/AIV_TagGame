@@ -19,14 +19,14 @@ public:
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void ResetMatch();
+	UFUNCTION(BlueprintCallable,Category = "TagGameGameMode")
+	void ResetMatchForPlayer();
 	const TArray<class ABall*>& GetKeys() const;
 	ATreasureChest* GetChest() const;
-	const TArray<class ATagGameCharacter*>& GetAdversaries() const;
 protected:
 	TArray<ATargetPoint*> TargetPoints;
 	TArray<ABall*> Keys;
 	ATreasureChest* Chest;
-	TArray<ATagGameCharacter*> Adversaries;
 
 
 };
