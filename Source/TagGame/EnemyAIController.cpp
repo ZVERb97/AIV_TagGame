@@ -98,17 +98,33 @@ void AEnemyAIController::BeginPlay()
 			UE_LOG(LogTemp, Error, TEXT("CHEST"));
 			
 		},
-		nullptr,
+		[this](AAIController* AIController) {
+
+
+			BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+			BestKey->AttachToActor(Chest, FAttachmentTransformRules::KeepRelativeTransform);
+			BestKey->SetHidden(true);
+
+		},
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
 			EPathFollowingStatus::Type State = AIController->GetMoveStatus();
 
 			for (int32 Index = 0; Index < Characters.Num(); Index++)
 			{
-				if (AIController->GetPawn() != Characters[Index]->GetParentActor() && 
+				if (AIController->GetCharacter() != Characters[Index] && 
 					FVector::Distance(AIController->GetPawn()->GetActorLocation(), Characters[Index]->GetActorLocation()) < 50.f)
 				{
-					return StunCoolDown;
+					AIController->StopMovement();
+					CurrentTimer = StunCooldown;
+
+					CurrentTimer -= DeltaTime;
+
+					if (CurrentTimer <= 0)
+					{
+						return GoToKeys;
+					}
+
 				}
 			}
 			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
@@ -120,8 +136,6 @@ void AEnemyAIController::BeginPlay()
 			{
 				return nullptr;
 			}
-
-			BestKey->SetActorHiddenInGame(true);
 
 			return Wait;
 		});
@@ -149,7 +163,6 @@ void AEnemyAIController::BeginPlay()
 			{
 				UE_LOG(LogTemp, Error, TEXT("Toccato"));
 				BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-				BestKey->SetActorLocation(FVector(200, 0, 20));
 				return GoToKeys;
 			}
 
@@ -174,25 +187,6 @@ void AEnemyAIController::BeginPlay()
 
 			return nullptr;
 		});
-	StunCoolDown = MakeShared<FAIVState>(
-		[this](AAIController* AIController) {
-
-			CurrentTimer = StunCooldown;
-			UE_LOG(LogTemp, Error, TEXT("WAITING"));
-
-		},
-		nullptr,
-		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
-
-			CurrentTimer -= DeltaTime;
-			if (CurrentTimer <= 0)
-			{
-				return GoToKeys;
-			}
-
-			return nullptr;
-		});
-	
 
 	CurrentState = SearchForKeys;
 	CurrentState->CallEnter(this);
