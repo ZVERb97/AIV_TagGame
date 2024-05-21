@@ -64,6 +64,10 @@ void AEnemyAIController::BeginPlay()
 			{
 				return nullptr;
 			}
+			if (BestKey->GetAttachParentActor())
+			{
+				return Fight;
+			}
 			return GrabKeys;
 		});
 
@@ -120,10 +124,11 @@ void AEnemyAIController::BeginPlay()
 	Fight = MakeShared<FAIVState>(
 		[this](AAIController* AIController) {
 
-			if (BestKey->GetAttachParentActor())
+			UE_LOG(LogTemp, Error, TEXT("FIGHT!"));
+			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				Adversary = BestKey->GetAttachParentActor();
-				AIController->MoveToActor(Adversary, 10.f);
+				AIController->MoveToActor(Adversary, 100.f);
 			}
 
 		},
@@ -132,15 +137,15 @@ void AEnemyAIController::BeginPlay()
 
 			if(!BestKey->GetAttachParentActor())
 			{
-				return SearchForKeys;
+				return GoToKeys;
 			}
 			
-			if (AIController->IsOverlappingActor(Adversary) && BestKey->GetAttachParentActor() == Adversary)
+			if (FVector::Distance(AIController->GetPawn()->GetActorLocation(),Adversary->GetActorLocation()) < 150.f )
 			{
-				
+				UE_LOG(LogTemp, Error, TEXT("Toccato"));
 				BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-				BestKey->SetActorRelativeLocation(FVector(200, 0, 20));
-				return SearchForKeys;
+				BestKey->SetActorLocation(FVector(200, 0, 20));
+				return GoToKeys;
 			}
 
 			return nullptr;
@@ -159,7 +164,25 @@ void AEnemyAIController::BeginPlay()
 			CurrentTimer -= DeltaTime;
 			if (CurrentTimer <= 0)
 			{
-				return SearchForKeys;
+				return GoToKeys;
+			}
+
+			return nullptr;
+		});
+	StunCoolDown = MakeShared<FAIVState>(
+		[this](AAIController* AIController) {
+
+			CurrentTimer = StunCooldown;
+			UE_LOG(LogTemp, Error, TEXT("WAITING"));
+
+		},
+		nullptr,
+		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
+
+			CurrentTimer -= DeltaTime;
+			if (CurrentTimer <= 0)
+			{
+				return GoToKeys;
 			}
 
 			return nullptr;

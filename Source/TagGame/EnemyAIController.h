@@ -85,12 +85,15 @@ protected:
 	TSharedPtr<FAIVState> GoToKeys;
 	TSharedPtr<FAIVState> GrabKeys;
 	TSharedPtr<FAIVState> GoToChest;
+	TSharedPtr<FAIVState> StunCoolDown;
 	TSharedPtr<FAIVState> Wait;
+
 
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	ABall* BestKey;
 	ATreasureChest* Chest;
+	UPROPERTY(BlueprintReadOnly)
 	AActor* Adversary;
 	float TimeToWait = 1.5f;
 	float StunCooldown = 3.f;

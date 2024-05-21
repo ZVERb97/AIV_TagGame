@@ -41,9 +41,13 @@ void ATagGameGameMode::Tick(float DeltaTime)
 		{
 			return;
 		}
+		else
+		{
+			ResetMatch();
+
+		}
 	}
 
-	ResetMatch();
 }
 
 void ATagGameGameMode::ResetMatch()
