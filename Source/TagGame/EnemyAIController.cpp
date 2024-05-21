@@ -11,6 +11,7 @@
 void AEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
+	
 
 	SearchForKeys = MakeShared<FAIVState>(
 		[this](AAIController* AIController) {
@@ -33,7 +34,7 @@ void AEnemyAIController::BeginPlay()
 			}
 
 			BestKey = NearestKey;
-			UE_LOG(LogTemp, Warning, TEXT("Searching for Ball"));
+			UE_LOG(LogTemp, Error, TEXT("FOUND KEY"));
 		},
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
@@ -52,8 +53,8 @@ void AEnemyAIController::BeginPlay()
 	GoToKeys = MakeShared<FAIVState>(
 		[this](AAIController* AIController) {
 
-			AIController->MoveToActor(BestKey, 100.f);
-			UE_LOG(LogTemp, Warning, TEXT("Going to the Key"));
+			AIController->MoveToActor(BestKey, 10.f);
+			UE_LOG(LogTemp, Error, TEXT("GOING TO THE KEY"));
 		},
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
@@ -77,6 +78,7 @@ void AEnemyAIController::BeginPlay()
 			}
 				BestKey->AttachToActor(AIController->GetPawn(), FAttachmentTransformRules::KeepRelativeTransform);
 				BestKey->SetActorRelativeLocation(FVector(0,0,150));
+				UE_LOG(LogTemp, Error, TEXT("GRABBED KEY"));
 				return GoToChest;
 
 		});
@@ -88,7 +90,7 @@ void AEnemyAIController::BeginPlay()
 			ATagGameGameMode* AIGameMode = Cast<ATagGameGameMode>(GameModeToSearch);
 			Chest = AIGameMode->GetChest();
 			AIController->MoveToActor(Chest, 100.f);
-			UE_LOG(LogTemp, Warning, TEXT("Going to the chest"));
+			UE_LOG(LogTemp, Error, TEXT("CHEST"));
 			
 		},
 		[this](AAIController* AIController) {
@@ -102,7 +104,12 @@ void AEnemyAIController::BeginPlay()
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
 			EPathFollowingStatus::Type State = AIController->GetMoveStatus();
-			if (State == EPathFollowingStatus::Moving)
+
+			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
+			{
+				return Fight;
+
+			}else if (State == EPathFollowingStatus::Moving)
 			{
 				return nullptr;
 			}
@@ -113,31 +120,26 @@ void AEnemyAIController::BeginPlay()
 	Fight = MakeShared<FAIVState>(
 		[this](AAIController* AIController) {
 
-			//AIController->MoveToActor(AIController->GetWorld()->GetFirstPlayerController()->GetPawn(), 100.f);
-			AGameModeBase* GameModeToSearch = AIController->GetWorld()->GetAuthGameMode();
-			ATagGameGameMode* AIGameMode = Cast<ATagGameGameMode>(GameModeToSearch);
-			const TArray<ABall*>& KeysList = AIGameMode->GetKeys();
-			for (int32 Index = 0; Index < KeysList.Num(); Index++)
+			if (BestKey->GetAttachParentActor())
 			{
-				if (KeysList[Index]->GetAttachParentActor())
-				{
-					Adversary = KeysList[Index]->GetAttachParentActor();
-					AIController->MoveToActor(Adversary,100.f);
-				}
+				Adversary = BestKey->GetAttachParentActor();
+				AIController->MoveToActor(Adversary, 10.f);
 			}
 
 		},
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
-			EPathFollowingStatus::Type State = AIController->GetMoveStatus();
-			if (State == EPathFollowingStatus::Moving)
+			if(!BestKey->GetAttachParentActor())
 			{
-				return nullptr;
+				return SearchForKeys;
 			}
 			
-			if(!BestKey->GetParentActor())
+			if (AIController->IsOverlappingActor(Adversary) && BestKey->GetAttachParentActor() == Adversary)
 			{
+				
+				BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+				BestKey->SetActorRelativeLocation(FVector(200, 0, 20));
 				return SearchForKeys;
 			}
 
@@ -148,6 +150,7 @@ void AEnemyAIController::BeginPlay()
 		[this](AAIController* AIController) {
 
 			CurrentTimer = TimeToWait;
+			UE_LOG(LogTemp, Error, TEXT("WAITING"));
 
 		},
 		nullptr,

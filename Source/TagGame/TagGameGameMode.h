@@ -18,9 +18,8 @@ public:
 	ATagGameGameMode();
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
-	void ResetMatch();
 	UFUNCTION(BlueprintCallable,Category = "TagGameGameMode")
-	void ResetMatchForPlayer();
+	void ResetMatch();
 	const TArray<class ABall*>& GetKeys() const;
 	ATreasureChest* GetChest() const;
 protected:

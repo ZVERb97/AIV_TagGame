@@ -56,14 +56,8 @@ void ATagGameGameMode::ResetMatch()
 	for (TActorIterator<ABall> It(GetWorld()); It; ++It)
 	{
 		Keys.Add(*It);
-
-		if (It->GetAttachParentActor() != GetWorld()->GetFirstPlayerController()->GetPawn())
-		{
-			It->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-		}
-
+		It->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 		It->SetActorHiddenInGame(false);
-
 	}
 	
 
@@ -76,39 +70,6 @@ void ATagGameGameMode::ResetMatch()
 		RandomTargetPoints.RemoveAt(RandomTargetIndex);
 	}
 	
-}
-
-void ATagGameGameMode::ResetMatchForPlayer()
-{
-	for (TActorIterator<ATargetPoint> It(GetWorld()); It; ++It)
-	{
-		TargetPoints.Add(*It);
-
-	}
-	for (TActorIterator<ABall> It(GetWorld()); It; ++It)
-	{
-		Keys.Add(*It);
-
-		UE_LOG(LogTemp, Error, TEXT("RESET MATCH"));
-
-		if (It->GetAttachParentActor() == GetWorld()->GetFirstPlayerController()->GetPawn())
-		{
-			It->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-		}
-
-		It->SetActorHiddenInGame(false);
-
-	}
-
-
-	TArray<ATargetPoint*> RandomTargetPoints = TargetPoints;
-
-	for (int32 Index = 0; Index < Keys.Num(); Index++)
-	{
-		const int32 RandomTargetIndex = FMath::RandRange(0, RandomTargetPoints.Num() - 1);
-		Keys[Index]->SetActorLocation(RandomTargetPoints[RandomTargetIndex]->GetActorLocation());
-		RandomTargetPoints.RemoveAt(RandomTargetIndex);
-	}
 }
 
 const TArray<ABall*>& ATagGameGameMode::GetKeys() const

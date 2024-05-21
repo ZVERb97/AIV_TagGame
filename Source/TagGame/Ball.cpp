@@ -9,13 +9,8 @@ ABall::ABall()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
-	bIsKeyTaken = false;
 }
 
-bool ABall::GetIsKeyTaken()
-{
-	return bIsKeyTaken;
-}
 
 // Called when the game starts or when spawned
 void ABall::BeginPlay()

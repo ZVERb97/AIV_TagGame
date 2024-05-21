@@ -16,12 +16,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMeshComponent;
 	ABall();
-	bool GetIsKeyTaken();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	bool bIsKeyTaken;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

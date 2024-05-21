@@ -80,6 +80,7 @@ class TAGGAME_API AEnemyAIController : public AAIController
 protected:
 	TSharedPtr<FAIVState> CurrentState;
 	TSharedPtr<FAIVState> Fight;
+	TSharedPtr<FAIVState> GetStunned;
 	TSharedPtr<FAIVState> SearchForKeys;
 	TSharedPtr<FAIVState> GoToKeys;
 	TSharedPtr<FAIVState> GrabKeys;
@@ -88,10 +89,10 @@ protected:
 
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
-
 	ABall* BestKey;
 	ATreasureChest* Chest;
 	AActor* Adversary;
 	float TimeToWait = 1.5f;
+	float StunCooldown = 3.f;
 	float CurrentTimer = 0.f;
 };
