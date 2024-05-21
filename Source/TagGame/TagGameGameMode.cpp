@@ -23,10 +23,15 @@ void ATagGameGameMode::BeginPlay()
 	Super::BeginPlay();
 	TargetPoints.Empty();
 	Keys.Empty();
+	Characters.Empty();
 	for (TActorIterator<ATreasureChest> It(GetWorld()); It; ++It)
 	{
 		Chest = (*It);
 
+	}
+	for (TActorIterator<ACharacter> It(GetWorld()); It; ++It)
+	{
+		Characters.Add(*It);
 	}
 	ResetMatch();
 }
@@ -79,6 +84,11 @@ void ATagGameGameMode::ResetMatch()
 const TArray<ABall*>& ATagGameGameMode::GetKeys() const
 {
 	return Keys;
+}
+
+const TArray<ACharacter*>& ATagGameGameMode::GetCharacters() const
+{
+	return Characters;
 }
 
 ATreasureChest* ATagGameGameMode::GetChest() const

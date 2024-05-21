@@ -21,10 +21,12 @@ public:
 	UFUNCTION(BlueprintCallable,Category = "TagGameGameMode")
 	void ResetMatch();
 	const TArray<class ABall*>& GetKeys() const;
+	const TArray<class ACharacter*>& GetCharacters() const;
 	ATreasureChest* GetChest() const;
 protected:
 	TArray<ATargetPoint*> TargetPoints;
 	TArray<ABall*> Keys;
+	TArray<ACharacter*> Characters;
 	ATreasureChest* Chest;
 
 

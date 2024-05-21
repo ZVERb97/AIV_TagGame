@@ -64,7 +64,7 @@ void AEnemyAIController::BeginPlay()
 			{
 				return nullptr;
 			}
-			if (BestKey->GetAttachParentActor())
+			if (BestKey->GetAttachParentActor() && BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				return Fight;
 			}
@@ -76,7 +76,7 @@ void AEnemyAIController::BeginPlay()
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
-			if (BestKey->GetAttachParentActor())
+			if (BestKey->GetAttachParentActor() && BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				return Fight;
 			}
@@ -92,32 +92,37 @@ void AEnemyAIController::BeginPlay()
 
 			AGameModeBase* GameModeToSearch = AIController->GetWorld()->GetAuthGameMode();
 			ATagGameGameMode* AIGameMode = Cast<ATagGameGameMode>(GameModeToSearch);
+			Characters = AIGameMode->GetCharacters();
 			Chest = AIGameMode->GetChest();
 			AIController->MoveToActor(Chest, 100.f);
 			UE_LOG(LogTemp, Error, TEXT("CHEST"));
 			
 		},
-		[this](AAIController* AIController) {
-
-			BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-			BestKey->AttachToActor(Chest, FAttachmentTransformRules::KeepRelativeTransform);
-			BestKey->SetActorHiddenInGame(true);
-			
-
-		},
+		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
 			EPathFollowingStatus::Type State = AIController->GetMoveStatus();
 
+			for (int32 Index = 0; Index < Characters.Num(); Index++)
+			{
+				if (AIController->GetPawn() != Characters[Index]->GetParentActor() && 
+					FVector::Distance(AIController->GetPawn()->GetActorLocation(), Characters[Index]->GetActorLocation()) < 50.f)
+				{
+					return StunCoolDown;
+				}
+			}
 			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				return Fight;
 
-			}else if (State == EPathFollowingStatus::Moving)
+			}
+			else if (State == EPathFollowingStatus::Moving)
 			{
 				return nullptr;
 			}
-			
+
+			BestKey->SetActorHiddenInGame(true);
+
 			return Wait;
 		});
 
@@ -140,7 +145,7 @@ void AEnemyAIController::BeginPlay()
 				return GoToKeys;
 			}
 			
-			if (FVector::Distance(AIController->GetPawn()->GetActorLocation(),Adversary->GetActorLocation()) < 150.f )
+			if (FVector::Distance(AIController->GetPawn()->GetActorLocation(),Adversary->GetActorLocation()) < 100.f )
 			{
 				UE_LOG(LogTemp, Error, TEXT("Toccato"));
 				BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);

@@ -93,8 +93,8 @@ protected:
 	void Tick(float DeltaTime) override;
 	ABall* BestKey;
 	ATreasureChest* Chest;
-	UPROPERTY(BlueprintReadOnly)
 	AActor* Adversary;
+	TArray<ACharacter*> Characters;
 	float TimeToWait = 1.5f;
 	float StunCooldown = 3.f;
 	float CurrentTimer = 0.f;
