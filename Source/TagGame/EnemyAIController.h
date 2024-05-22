@@ -98,4 +98,6 @@ protected:
 	float TimeToWait = 1.5f;
 	float StunCooldown = 3.f;
 	float CurrentTimer = 0.f;
+	UPROPERTY(VisibleAnyWhere,BlueprintReadOnly)
+	int32 KeyCounter = 0;
 };

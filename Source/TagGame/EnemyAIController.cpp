@@ -104,7 +104,7 @@ void AEnemyAIController::BeginPlay()
 			BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 			BestKey->AttachToActor(Chest, FAttachmentTransformRules::KeepRelativeTransform);
 			BestKey->SetActorHiddenInGame(true);
-
+			KeyCounter++;
 		},
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
@@ -127,12 +127,7 @@ void AEnemyAIController::BeginPlay()
 
 				}
 			}
-			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
-			{
-				return Fight;
-
-			}
-			else if (State == EPathFollowingStatus::Moving)
+			if (State == EPathFollowingStatus::Moving)
 			{
 				return nullptr;
 			}
