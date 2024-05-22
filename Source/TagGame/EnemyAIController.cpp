@@ -53,7 +53,7 @@ void AEnemyAIController::BeginPlay()
 	GoToKeys = MakeShared<FAIVState>(
 		[this](AAIController* AIController) {
 
-			AIController->MoveToActor(BestKey, 10.f);
+			AIController->MoveToActor(BestKey, 50.f);
 			UE_LOG(LogTemp, Error, TEXT("GOING TO THE KEY"));
 		},
 		nullptr,
@@ -76,10 +76,10 @@ void AEnemyAIController::BeginPlay()
 		nullptr,
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
 
-			if (BestKey->GetAttachParentActor() && BestKey->GetAttachParentActor() != AIController->GetPawn())
+			/*if (BestKey->GetAttachParentActor() && BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				return Fight;
-			}
+			}*/
 				BestKey->AttachToActor(AIController->GetPawn(), FAttachmentTransformRules::KeepRelativeTransform);
 				BestKey->SetActorRelativeLocation(FVector(0,0,150));
 				UE_LOG(LogTemp, Error, TEXT("GRABBED KEY"));
@@ -94,7 +94,7 @@ void AEnemyAIController::BeginPlay()
 			ATagGameGameMode* AIGameMode = Cast<ATagGameGameMode>(GameModeToSearch);
 			Characters = AIGameMode->GetCharacters();
 			Chest = AIGameMode->GetChest();
-			AIController->MoveToActor(Chest, 100.f);
+			AIController->MoveToActor(Chest, 50.f);
 			UE_LOG(LogTemp, Error, TEXT("CHEST"));
 			
 		},
@@ -103,7 +103,7 @@ void AEnemyAIController::BeginPlay()
 
 			BestKey->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 			BestKey->AttachToActor(Chest, FAttachmentTransformRules::KeepRelativeTransform);
-			BestKey->SetHidden(true);
+			BestKey->SetActorHiddenInGame(true);
 
 		},
 		[this](AAIController* AIController, const float DeltaTime) -> TSharedPtr<FAIVState> {
@@ -113,7 +113,7 @@ void AEnemyAIController::BeginPlay()
 			for (int32 Index = 0; Index < Characters.Num(); Index++)
 			{
 				if (AIController->GetCharacter() != Characters[Index] && 
-					FVector::Distance(AIController->GetPawn()->GetActorLocation(), Characters[Index]->GetActorLocation()) < 50.f)
+					FVector::Distance(AIController->GetPawn()->GetActorLocation(), Characters[Index]->GetActorLocation()) < 100.f)
 				{
 					AIController->StopMovement();
 					CurrentTimer = StunCooldown;
@@ -147,7 +147,7 @@ void AEnemyAIController::BeginPlay()
 			if (BestKey->GetAttachParentActor() != AIController->GetPawn())
 			{
 				Adversary = BestKey->GetAttachParentActor();
-				AIController->MoveToActor(Adversary, 100.f);
+				AIController->MoveToActor(Adversary, 50.f);
 			}
 
 		},
